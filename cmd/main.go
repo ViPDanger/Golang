@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,11 +19,13 @@ func err_log(err error) bool {
 }
 
 func main() {
+	var NewServer internal.Server
+	var handler http.Handler
 	addres, port := internal.Read_Config()
-	response, err := http.Get(addres + ":" + port + "/get")
+	go NewServer.Run(addres, port, handler)
+	io.Reader
+	response, err := http.Post(addres+":"+port+"/get", "Data")
 	err_log(err)
-	log.Println("Status: ", response.StatusCode)
-	content, _ := ioutil.ReadAll(response.Body)
+
 	log.Println(string(content))
-	return
 }

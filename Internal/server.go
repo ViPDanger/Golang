@@ -2,35 +2,40 @@ package internal
 
 import (
 	"context"
+	"io/iotil"
 	"net/http"
-	"time"
+"time"
 )
 
-type Server struct {
-	httpServer *http.Server
+tpe Server struct {
+httpServer *http.Server
 }
 
-type CustomHandler struct {
+ype CustomHandler struct {
 }
-
-func (s *Server) Run(port string, handler http.Handler) error {
-	http.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
-		http.Get(s.httpServer)
-	})
-
-	http.HandleFunc("/Shutdown", func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		cancel()
-		s.httpServer.Shutdown(ctx)
-	})
 
 	s.httpServer = &http.Server{
-		Addr:           ":" + port,
+		Addr:           addres + ":" + port,
 		Handler:        handler,
 		MaxHeaderBytes: 1 << 20,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   20 * time.Second,
 	}
+
+	http.HandleFunc("/get", func(w http.Responseriter, r *http.Request) {
+			response, err := http.Get(s.httpServer.Add)
+			if err != nil {	log.Fatal(err)}
+		
+		defer response.Body.
+		l.Println("Status: ", response.StatusCode)
+content, _ := ioutil.ReadAll(response.Body)
+	})
+
+	http.HaneFunc("/Shutdown", func(w http.ResponseWriter, r *http.Request) {
+			ctx, cancel := context.WiTimeout(context.Background(), 5*time.Second)
+		ccel()
+s.httpServer.Shutdown(ctx)
+	})
 
 	return s.httpServer.ListenAndServe()
 }
