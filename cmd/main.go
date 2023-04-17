@@ -1,8 +1,6 @@
 package main
 
 import (
-	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -19,13 +17,14 @@ func err_log(err error) bool {
 }
 
 func main() {
+	//var Buffer bytes.Buffer
+	//Buffer.Write([]byte("SUSUAT"))
 	var NewServer internal.Server
 	var handler http.Handler
 	addres, port := internal.Read_Config()
 	go NewServer.Run(addres, port, handler)
-	io.Reader
-	response, err := http.Post(addres+":"+port+"/get", "Data")
-	err_log(err)
+	//response, err := http.Post(addres+":"+port+"/get", "Data", )
+	//err_log(err)
 
-	log.Println(string(content))
+	//log.Println(string(content))
 }
