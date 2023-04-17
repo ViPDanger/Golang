@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	internal "github.com/ViPDanger/Golang/internal"
+	internal "github.com/ViPDanger/Golang/Internal"
 )
 
 func err_log(err error) bool {
