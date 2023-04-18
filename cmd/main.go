@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	internal "github.com/ViPDanger/Golang/Internal"
 )
@@ -17,14 +20,14 @@ func err_log(err error) bool {
 }
 
 func main() {
-	//var Buffer bytes.Buffer
-	//Buffer.Write([]byte("SUSUAT"))
-	var NewServer internal.Server
-	var handler http.Handler
-	addres, port := internal.Read_Config()
-	go NewServer.Run(addres, port, handler)
-	//response, err := http.Post(addres+":"+port+"/get", "Data", )
-	//err_log(err)
 
-	//log.Println(string(content))
+	config := internal.Read_Config()
+	var NewServer internal.Server
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+	defer stop()
+
+	if err := NewServer.Run(config.Adress, config.Port, ctx); err != nil {
+		log.Fatal(err)
+	}
+
 }

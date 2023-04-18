@@ -2,10 +2,9 @@ package Internal
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -13,39 +12,65 @@ type Server struct {
 	httpServer *http.Server
 }
 
-type CustomHandler struct {
+func ServerShutdown(w http.ResponseWriter, r *http.Request) {
+	log.Println("Shutdown by http")
+
+	w.WriteHeader(http.StatusOK)
+
+	w.Write([]byte("Server is going got Killed. Murderer."))
+
+	// ТУТ ТИПА ДА ТАКОЙ УМНЫЙ СМОГ СИГНАЛ ПОСЛАТЬ ДА. Почти.
+	//process, err := os.FindProcess(syscall.Getpid())
+	// err_log(err)
+	log.Fatalln("FUCK IT MAN, DO IT HARD!!!!")
+	os.Exit(0)
 }
 
-func (c CustomHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-
-	http.HandleFunc("/?*", func(w http.ResponseWriter, r *http.Request) {
-
-		_, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Println(w, " OK")
-	})
-
-	http.HandleFunc("/Shutdown", func(w http.ResponseWriter, r *http.Request) {
-
-	})
+func GetData(w http.ResponseWriter, r *http.Request) {
+	log.Println("GetData!")
+	w.WriteHeader(http.StatusOK)
+	data := r.URL.Query().Get("data")
+	w.Write([]byte(data))
+	Add_Data(data)
 }
 
-func (s *Server) Run(addres string, port string, handler http.Handler) error {
+func setupHandlers(mux *http.ServeMux, ctx context.Context) {
+	mux.HandleFunc("/Shutdown", ServerShutdown)
+	mux.HandleFunc("/GetData", GetData)
 
+}
+
+func (s *Server) Run(addres string, port string, ctx context.Context) error {
+	// Отстройка параметров
+	mux := http.NewServeMux()
+	setupHandlers(mux, ctx)
 	s.httpServer = &http.Server{
 		Addr:           addres + ":" + port,
+		Handler:        mux,
 		MaxHeaderBytes: 1 << 20,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   20 * time.Second,
 	}
 
-	return s.httpServer.ListenAndServe()
-}
+	// Запуск сервера
+	go func() {
+		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen and serve: %v", err)
+		}
+	}()
+	log.Print("Sever starter on addres: ", addres+":"+port)
 
-func (s *Server) Shutdown() {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	s.httpServer.Shutdown(ctx)
-	log.Println("Server is Shudown!")
+	<-ctx.Done()
+
+	// Выключение сервера
+	log.Println("Shutting down")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := s.httpServer.Shutdown(shutdownCtx)
+	if err_log(err) {
+		return err
+	}
+
+	return nil
 }
