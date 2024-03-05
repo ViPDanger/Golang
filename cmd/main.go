@@ -1,11 +1,7 @@
 package main
 
 import (
-	"context"
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	internal "github.com/ViPDanger/Golang/Internal"
 )
@@ -23,10 +19,8 @@ func main() {
 
 	config := internal.Read_Config()
 	var NewServer internal.Server
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
-	defer stop()
 
-	if err := NewServer.Run(config.Adress, config.Port, ctx); err != nil {
+	if err := NewServer.Run(config.Adress, config.Port); err != nil {
 		log.Fatal(err)
 	}
 
