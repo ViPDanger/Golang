@@ -45,3 +45,21 @@ func Add_Data(str string) {
 	log.Println("Done.")
 
 }
+
+func Delete_Data(del_int int) {
+	config := Read_Config()
+	// Считывание данных с файла, корректировка
+	data := Read_Data(config.Data_File)
+	// Запись обьекта
+	file, err := os.Create(config.Data_File)
+	err_log(err)
+	for i := 0; i < len(*data); i++ {
+		if i != del_int {
+			file.Write([]byte((*data)[i] + "\n"))
+		}
+	}
+
+	defer file.Close()
+	log.Println("Done.")
+
+}

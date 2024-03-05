@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -25,21 +27,53 @@ func (c ShutDownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.cancel_on_http()
 }
 
-func GetData(w http.ResponseWriter, r *http.Request) {
+func AddHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("GetData!")
 	w.WriteHeader(http.StatusOK)
-	data := r.URL.Query().Get("data")
-	w.Write([]byte(data))
+	data := r.URL.Path
+	data = data[strings.IndexRune(data[1:], '/')+2:]
+	log.Println("GetData: ", data)
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("New string has been added: " + data + "\n"))
 	Add_Data(data)
+
+	// Показ нового списка
+	ShowHandler(w, r)
+}
+
+func ShowHandler(w http.ResponseWriter, r *http.Request) {
+	config := Read_Config()
+	data := *Read_Data(config.Data_File)
+	log.Println("Data was readed")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Current List:\n"))
+	for i := 0; i < len(data); i++ {
+		w.Write([]byte(strconv.Itoa(i) + ": " + data[i] + "\n"))
+	}
+}
+
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.WriteHeader(http.StatusOK)
+	data := r.URL.Path
+	data = data[strings.IndexRune(data[1:], '/')+2:]
+
+	// Удаление
+	data_int, _ := strconv.Atoi(data)
+	Delete_Data(data_int)
+	log.Println("String deleted: ", data_int)
+	w.WriteHeader(http.StatusOK)
+
+	// Показ нового списка
+	ShowHandler(w, r)
 }
 
 func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc) {
 	SD_Handler := ShutDownHandler{cancel_on_http: cancel_on_http}
 	mux.Handle("/Shutdown", SD_Handler)
-	//mux.HandleFunc("/Shutdown", ServerShutdown)
-	mux.HandleFunc("/GetData", GetData)
-
+	mux.HandleFunc("/Add/", AddHandler)
+	mux.HandleFunc("/Show", ShowHandler)
+	mux.HandleFunc("/Delete/", DeleteHandler)
 }
 
 func (s *Server) Run(addres string, port string) error {
@@ -63,7 +97,7 @@ func (s *Server) Run(addres string, port string) error {
 	// Запуск сервера
 	go func() {
 		if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen and serve: %v", err)
+			log.Fatalf("Fatal Error: %v", err)
 		}
 	}()
 	log.Print("Sever starter on addres: ", addres+":"+port)
