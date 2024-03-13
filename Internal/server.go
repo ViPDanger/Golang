@@ -35,7 +35,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("GetData: ", data)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("New string has been added: " + data + "\n"))
-	Add_Data(data)
+	txt_Add_Data(data)
 
 	// Показ нового списка
 	ShowHandler(w, r)
@@ -43,7 +43,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	config := Read_Config()
-	data := *Read_Data(config.Data_File)
+	data := *txt_Read_Data(config.Data_File)
 	log.Println("Data was readed")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Current List:\n"))
@@ -60,7 +60,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Удаление
 	data_int, _ := strconv.Atoi(data)
-	Delete_Data(data_int)
+	txt_Delete_Data(data_int)
 	log.Println("String deleted: ", data_int)
 	w.WriteHeader(http.StatusOK)
 

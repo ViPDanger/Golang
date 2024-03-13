@@ -15,7 +15,7 @@ func field_splitter(r rune) bool {
 
 }
 
-func Read_Data(filename string) *[]string {
+func txt_Read_Data(filename string) *[]string {
 	data := make([]byte, 1024)
 	file, err := os.Open(filename)
 	if err_log(err) {
@@ -29,10 +29,10 @@ func Read_Data(filename string) *[]string {
 	return &m_data
 }
 
-func Add_Data(str string) {
+func txt_Add_Data(str string) {
 	config := Read_Config()
 	// Считывание данных с файла, корректировка
-	data := Read_Data(config.Data_File)
+	data := txt_Read_Data(config.Data_File)
 	*data = append((*data), str)
 	// Запись обьекта
 	file, err := os.Create(config.Data_File)
@@ -46,10 +46,10 @@ func Add_Data(str string) {
 
 }
 
-func Delete_Data(del_int int) {
+func txt_Delete_Data(del_int int) {
 	config := Read_Config()
 	// Считывание данных с файла, корректировка
-	data := Read_Data(config.Data_File)
+	data := txt_Read_Data(config.Data_File)
 	// Запись обьекта
 	file, err := os.Create(config.Data_File)
 	err_log(err)
