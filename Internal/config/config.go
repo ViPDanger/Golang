@@ -7,14 +7,15 @@ import (
 )
 
 type Conf struct {
-	Adress      string `json:"addres"`
-	Port        string `json:"port"`
-	Data_File   string `json:"data_file"`
-	PG_host     string `json:"pg_host"`
-	PG_port     string `json:"pg_port"`
-	PG_user     string `json:"pg_user"`
-	PG_password string `json:"pg_password"`
-	PG_bdname   string `json:"pg_bdname"`
+	Adress          string `json:"addres"`
+	Port            string `json:"port"`
+	Data_File       string `json:"data_file"`
+	PG_host         string `json:"pg_host"`
+	PG_port         string `json:"pg_port"`
+	PG_user         string `json:"pg_user"`
+	PG_password     string `json:"pg_password"`
+	PG_bdname       string `json:"pg_bdname"`
+	PG_Con_Attempts string `json:"max_connection_attempts"`
 }
 
 func Err_log(err error) bool {
