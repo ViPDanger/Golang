@@ -1,4 +1,4 @@
-package Postgress
+package postgress
 
 import (
 	"context"
@@ -22,21 +22,15 @@ func NewClient(ctx context.Context, conf config.Conf) (pool *pgxpool.Pool, err e
 	// urlExample := "postgres://username:password@localhost:5432/database_name"
 	url := "postgres://" + conf.PG_user + ":" + conf.PG_password + "@" + conf.PG_host + ":" + conf.PG_port + "/" + conf.PG_bdname
 	attempts, _ := strconv.Atoi(conf.PG_Con_Attempts)
-
 	for attempts > 0 {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
-
 		pool, err = pgxpool.Connect(ctx, url)
-
 		config.Err_log(err)
 		if err != nil {
 			time.Sleep(5 * time.Second)
 		}
-
 		attempts--
 	}
-
 	return pool, nil
-
 }

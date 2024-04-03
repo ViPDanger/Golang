@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
+	
 )
 
 require (

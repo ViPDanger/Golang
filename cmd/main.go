@@ -1,7 +1,14 @@
 package main
 
+import (
+	"github.com/ViPDanger/Golang/Internal/config"
+	pg "github.com/ViPDanger/Golang/Internal/postgres"
+)
+
 func main() {
-	//config := config.Read_Config()
+
+	config := config.Read_Config()
+	pg.NewClient(config)
 	/*
 
 
