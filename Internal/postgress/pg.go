@@ -2,13 +2,13 @@ package Postgress
 
 import (
 	"context"
+	"strconv"
 	"time"
 
-	conf "github.com/ViPDanger/Golang/Internal/Config"
+	"github.com/ViPDanger/Golang/Internal/config"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	_ "github.com/lib/pq"
 )
 
 type Client interface {
@@ -18,10 +18,10 @@ type Client interface {
 	Begin(ctx context.Context) (pgx.Tx, error)
 }
 
-func NewClient(ctx context.Context, config conf.Conf) (pool *pgxpool.Pool, err error) {
+func NewClient(ctx context.Context, conf config.Conf) (pool *pgxpool.Pool, err error) {
 	// urlExample := "postgres://username:password@localhost:5432/database_name"
-	url := "postgres://" + config.PG_user + ":" + config.PG_password + "@" + config.PG_host + ":" + config.PG_port + "/" + config.PG_bdname
-	attempts := config.PG_Con_Attempts
+	url := "postgres://" + conf.PG_user + ":" + conf.PG_password + "@" + conf.PG_host + ":" + conf.PG_port + "/" + conf.PG_bdname
+	attempts, _ := strconv.Atoi(conf.PG_Con_Attempts)
 
 	for attempts > 0 {
 		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -29,7 +29,7 @@ func NewClient(ctx context.Context, config conf.Conf) (pool *pgxpool.Pool, err e
 
 		pool, err = pgxpool.Connect(ctx, url)
 
-		conf.Err_log(err)
+		config.Err_log(err)
 		if err != nil {
 			time.Sleep(5 * time.Second)
 		}
@@ -37,6 +37,6 @@ func NewClient(ctx context.Context, config conf.Conf) (pool *pgxpool.Pool, err e
 		attempts--
 	}
 
-	conn, err := pgx.Connect(context.Background(), url)
+	return pool, nil
 
 }

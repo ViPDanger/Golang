@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	conf "github.com/ViPDanger/Golang/Internal/Config"
+	conf "github.com/ViPDanger/Golang/Internal/config"
 )
 
 func field_splitter(r rune) bool {

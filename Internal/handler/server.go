@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	conf "github.com/ViPDanger/Golang/Internal/Config"
+	config "github.com/ViPDanger/Golang/Internal/config"
 )
 
 type Server struct {
@@ -44,7 +44,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
-	config := conf.Read_Config()
+	config := config.Read_Config()
 	data := *txt_Read_Data(config.Data_File)
 	log.Println("Data was readed")
 	w.WriteHeader(http.StatusOK)
@@ -112,7 +112,7 @@ func (s *Server) Run(addres string, port string) error {
 	defer cancel()
 	s.httpServer.Close()
 	err := s.httpServer.Shutdown(shutdownCtx)
-	if conf.Err_log(err) {
+	if config.Err_log(err) {
 		return err
 	}
 

@@ -1,12 +1,7 @@
 package main
 
-import (
-	config "github.com/ViPDanger/Golang/Internal/Config"
-	pg "github.com/ViPDanger/Golang/Internal/Postgress"
-)
-
 func main() {
-	config := config.Read_Config()
+	//config := config.Read_Config()
 	/*
 
 
@@ -15,6 +10,4 @@ func main() {
 			log.Fatal(err)
 		}
 	*/
-	pg.PG_connect(config)
-
 }
