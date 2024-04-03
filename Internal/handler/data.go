@@ -1,9 +1,11 @@
-package Internal
+package Handler
 
 import (
 	"log"
 	"os"
 	"strings"
+
+	conf "github.com/ViPDanger/Golang/Internal/Config"
 )
 
 func field_splitter(r rune) bool {
@@ -18,25 +20,25 @@ func field_splitter(r rune) bool {
 func txt_Read_Data(filename string) *[]string {
 	data := make([]byte, 1024)
 	file, err := os.Open(filename)
-	if err_log(err) {
+	if conf.Err_log(err) {
 		os.Create(filename)
 	}
 
 	file_size, err := file.Read(data)
 	m_data := strings.FieldsFunc(string(data[:file_size]), field_splitter)
 	defer file.Close()
-	err_log(err)
+	conf.Err_log(err)
 	return &m_data
 }
 
 func txt_Add_Data(str string) {
-	config := Read_Config()
+	config := conf.Read_Config()
 	// Считывание данных с файла, корректировка
 	data := txt_Read_Data(config.Data_File)
 	*data = append((*data), str)
 	// Запись обьекта
 	file, err := os.Create(config.Data_File)
-	err_log(err)
+	conf.Err_log(err)
 	for i := 0; i < len(*data); i++ {
 		file.Write([]byte((*data)[i] + "\n"))
 	}
@@ -47,12 +49,12 @@ func txt_Add_Data(str string) {
 }
 
 func txt_Delete_Data(del_int int) {
-	config := Read_Config()
+	config := conf.Read_Config()
 	// Считывание данных с файла, корректировка
 	data := txt_Read_Data(config.Data_File)
 	// Запись обьекта
 	file, err := os.Create(config.Data_File)
-	err_log(err)
+	conf.Err_log(err)
 	for i := 0; i < len(*data); i++ {
 		if i != del_int {
 			file.Write([]byte((*data)[i] + "\n"))

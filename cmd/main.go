@@ -1,18 +1,20 @@
 package main
 
 import (
-	internal "github.com/ViPDanger/Golang/Internal"
+	config "github.com/ViPDanger/Golang/Internal/Config"
+	pg "github.com/ViPDanger/Golang/Internal/Postgress"
 )
 
 func main() {
+	config := config.Read_Config()
 	/*
-		config := internal.Read_Config()
 
-			var NewServer internal.Server
-			if err := NewServer.Run(config.Adress, config.Port); err != nil {
-				log.Fatal(err)
-			}
+
+		var NewServer internal.Server
+		if err := NewServer.Run(config.Adress, config.Port); err != nil {
+			log.Fatal(err)
+		}
 	*/
-	internal.PG_connect()
+	pg.PG_connect(config)
 
 }
