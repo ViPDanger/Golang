@@ -12,6 +12,7 @@ import (
 	"time"
 
 	config "github.com/ViPDanger/Golang/Internal/config"
+	txt "github.com/ViPDanger/Golang/Internal/txt_file"
 )
 
 type Server struct {
@@ -37,7 +38,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("GetData: ", data)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("New string has been added: " + data + "\n"))
-	txt_Add_Data(data)
+	txt.TXT_Add_Data(data)
 
 	// Показ нового списка
 	ShowHandler(w, r)
@@ -45,7 +46,7 @@ func AddHandler(w http.ResponseWriter, r *http.Request) {
 
 func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	config := config.Read_Config()
-	data := *txt_Read_Data(config.Data_File)
+	data := *txt.TXT_Read_Data(config.Data_File)
 	log.Println("Data was readed")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Current List:\n"))
@@ -62,7 +63,7 @@ func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Удаление
 	data_int, _ := strconv.Atoi(data)
-	txt_Delete_Data(data_int)
+	txt.TXT_Delete_Data(data_int)
 	log.Println("String deleted: ", data_int)
 	w.WriteHeader(http.StatusOK)
 

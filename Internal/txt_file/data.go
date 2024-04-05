@@ -1,4 +1,4 @@
-package Handler
+package txt_file
 
 import (
 	"log"
@@ -17,7 +17,7 @@ func field_splitter(r rune) bool {
 
 }
 
-func txt_Read_Data(filename string) *[]string {
+func TXT_Read_Data(filename string) *[]string {
 	data := make([]byte, 1024)
 	file, err := os.Open(filename)
 	if conf.Err_log(err) {
@@ -31,10 +31,10 @@ func txt_Read_Data(filename string) *[]string {
 	return &m_data
 }
 
-func txt_Add_Data(str string) {
+func TXT_Add_Data(str string) {
 	config := conf.Read_Config()
 	// Считывание данных с файла, корректировка
-	data := txt_Read_Data(config.Data_File)
+	data := TXT_Read_Data(config.Data_File)
 	*data = append((*data), str)
 	// Запись обьекта
 	file, err := os.Create(config.Data_File)
@@ -48,10 +48,10 @@ func txt_Add_Data(str string) {
 
 }
 
-func txt_Delete_Data(del_int int) {
+func TXT_Delete_Data(del_int int) {
 	config := conf.Read_Config()
 	// Считывание данных с файла, корректировка
-	data := txt_Read_Data(config.Data_File)
+	data := TXT_Read_Data(config.Data_File)
 	// Запись обьекта
 	file, err := os.Create(config.Data_File)
 	conf.Err_log(err)
