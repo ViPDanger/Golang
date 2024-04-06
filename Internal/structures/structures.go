@@ -1,12 +1,12 @@
 package structures
 
 type Author struct {
-	ID   string `json:"id"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
 type Content struct {
-	ID      string `json:"id"`
+	ID      int    `json:"id"`
 	Content string `json:"content"`
 	Author  Author `json:"author"`
 	Date    string `json:"date"`
@@ -14,7 +14,7 @@ type Content struct {
 
 type ContentDTO struct {
 	Content   string `json:"content"`
-	Author_id string `json:"author_id"`
+	Author_id int    `json:"author_id"`
 	Date      string `json:"date"`
 }
 

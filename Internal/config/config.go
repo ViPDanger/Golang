@@ -7,7 +7,7 @@ import (
 )
 
 type Conf struct {
-	Adress          string `json:"addres"`
+	Adress          string `json:"adress"`
 	Port            string `json:"port"`
 	Data_File       string `json:"data_file"`
 	PG_host         string `json:"pg_host"`
@@ -29,7 +29,7 @@ func Err_log(err error) bool {
 func Read_Config() Conf {
 	var config Conf
 	data := make([]byte, 1024)
-	file, err := os.Open("cmd/config.cfg")
+	file, err := os.Open("config.cfg")
 	if Err_log(err) {
 		panic(err)
 	}
