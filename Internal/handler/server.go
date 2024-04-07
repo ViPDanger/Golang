@@ -18,7 +18,6 @@ type Server struct {
 }
 type ShutDownHandler struct {
 	cancel_on_http context.CancelFunc
-	rep            pg.Repository
 }
 
 func (sht ShutDownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -29,8 +28,8 @@ func (sht ShutDownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	sht.cancel_on_http()
 }
 
-func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc, rep pg.Repository) {
-	SD_Handler := ShutDownHandler{cancel_on_http: cancel_on_http, rep: rep}
+func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc, rep *pg.Repository) {
+	SD_Handler := ShutDownHandler{cancel_on_http: cancel_on_http}
 	mux.Handle("/Shutdown", SD_Handler)
 	mux.HandleFunc("/txt/Add/", TXT_AddHandler)
 	mux.HandleFunc("/txt/Show", TXT_ShowHandler)
@@ -41,7 +40,7 @@ func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc, rep pg
 	mux.HandleFunc("/", Get)
 }
 
-func (s *Server) Run(addres string, port string, rep pg.Repository) error {
+func (s *Server) Run(addres string, port string, rep *pg.Repository) error {
 	// Отстройка параметров
 
 	ctx_HTTP_Shutdown, cancel_on_http := context.WithCancel(context.Background())

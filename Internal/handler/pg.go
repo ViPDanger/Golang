@@ -33,7 +33,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func PG_Response(w http.ResponseWriter, r *http.Request, rep pg.Repository) {
+func PG_Response(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("RESPOOONSE!!!"))
 }
