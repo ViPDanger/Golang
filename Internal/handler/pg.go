@@ -7,7 +7,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ViPDanger/Golang/Internal/config"
 	pg "github.com/ViPDanger/Golang/Internal/postgres"
 	"github.com/ViPDanger/Golang/Internal/structures"
 	t "github.com/ViPDanger/Golang/templates"
@@ -65,142 +64,105 @@ func PG_Response(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 }
 func PG_AllAuthors(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
-	authors, _ := rep.All_Authors()
-	t.TableMaker(w, authors)
+	authors, err := rep.All_Authors()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to find Authors"))
+		return
+	}
+	t.TableMaker(w, "AllAuthors", []string{"ID", "Name"}, authors)
 }
 
 func PG_AllContent(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
-	content, _ := rep.All_Content()
-
-	var table structures.Table
-
-	table.Title = ""
-	table.First_Line = append(table.First_Line, "ID", "Content", "Author_ID", "Author_Name")
-
-	t.TableMaker(w, content)
+	content, err := rep.All_Content()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to find Content"))
+		return
+	}
+	t.TableMaker(w, "AllContent", []string{"ID", "Content", "ID Author", "Author", "Date"}, content)
 }
 
 func PG_FindAuthor(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
-	id, _ := strconv.Atoi(r.FormValue("id"))
-	author, err := rep.Find_Author(id)
+	author, err := rep.Find_Author(r.FormValue("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to find Author with this id"))
 		return
 	}
-	t, err := template.ParseFiles("./templates/result.html")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse files"))
-		return
-
-	}
-	page := structures.Result_Page{
-		Title:  "HTTP-PGSQL FIND AUTHOR",
-		Result: "ID: " + strconv.Itoa(author.ID) + "; Name: " + author.Name,
-	}
-	t.Execute(w, &page)
+	t.TableMaker(w, "FindAuthor", []string{"ID", "Name"}, author)
 }
 func PG_FindContent(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
-	id, _ := strconv.Atoi(r.FormValue("id"))
-	content, err := rep.Find_Content(id)
+	content, err := rep.Find_Content(r.FormValue("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to find Content with this id"))
 		return
 	}
-	t, err := template.ParseFiles("./templates/result.html")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse files"))
-		return
-
-	}
-	page := structures.Result_Page{
-		Title:  "HTTP-PGSQL FIND CONTENT",
-		Result: "ID: " + strconv.Itoa(content.ID) + "\nName: " + content.Content + "\n Author:" + strconv.Itoa(content.Author.ID) + ": " + content.Author.Name + "\n Date:" + content.Date,
-	}
-	t.Execute(w, &page)
+	t.TableMaker(w, "FindContent", []string{"ID", "Content", "ID Author", "Author", "Date"}, content)
 }
 
 func PG_InsertAuthor(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
 	id, err := rep.Insert_Author(structures.AuthorDTO{Name: r.FormValue("name")})
-	config.Err_log(err)
-	t, err := template.ParseFiles("./templates/result.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse files"))
+		w.Write([]byte("Unable to Insert Author"))
 		return
+	}
+	t.TableMaker(w, "InsertAuthor", []string{"Inserted ID", "Inserted Name"}, structures.Author{ID: id, Name: r.FormValue("name")})
 
-	}
-	page := structures.Result_Page{
-		Title:  "HTTP-PGSQL INSERT AUTHOR",
-		Result: "New ID of Author " + r.FormValue("name") + ": " + strconv.Itoa(id),
-	}
-	t.Execute(w, &page)
 }
 func PG_InsertContent(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
+
 	author_id, _ := strconv.Atoi(r.FormValue("author_id"))
 	date := time.Now().Format("02.01.2006  15:04:05")
 	id, err := rep.Insert_Content(structures.ContentDTO{Content: r.FormValue("content"), Author_id: author_id, Date: date})
-	config.Err_log(err)
-	t, err := template.ParseFiles("./templates/result.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse files"))
+		w.Write([]byte("Unable to Insert Content"))
 		return
 	}
-	page := structures.Result_Page{
-		Title:  "HTTP-PGSQL INSERT AUTHOR",
-		Result: "New ID of Content: " + r.FormValue("content") + ": " + strconv.Itoa(id),
-	}
-	t.Execute(w, &page)
+	author, _ := rep.Find_Author(r.FormValue("author_id"))
+	t.TableMaker(w, "InsertContent", []string{"Inserted ID", "Inserted Name"}, structures.Content{ID: id, Content: r.FormValue("content"), Author: author, Date: date})
+
 }
 
 func PG_DeleteAuthor(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
-	err := rep.Delete_Author(r.FormValue("id"))
+	author, err := rep.Find_Author(r.FormValue("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to find Author with this id"))
 		return
 	}
-
-	t, err := template.ParseFiles("./templates/result.html")
+	err = rep.Delete_Author(r.FormValue("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse files"))
+		w.Write([]byte("Unable to find Author with this id"))
 		return
 	}
-	page := structures.Result_Page{
-		Title:  "HTTP-PGSQL DELETE AUTHOR",
-		Result: "Author ID " + r.FormValue("id") + " deleted succsessfully",
-	}
-	t.Execute(w, &page)
+	t.TableMaker(w, "InsertContent", []string{"Deleted ID", "Deleted Name"}, author)
+
 }
 func PG_DeleteContent(w http.ResponseWriter, r *http.Request, rep *pg.Repository) {
 	w.WriteHeader(http.StatusOK)
-	err := rep.Delete_Content(r.FormValue("id"))
+	content, err := rep.Find_Content(r.FormValue("id"))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to find Author with this id"))
+		return
+	}
+	err = rep.Delete_Content(r.FormValue("id"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to find Content with this id"))
 		return
 	}
 
-	t, err := template.ParseFiles("./templates/result.html")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse files"))
-		return
-	}
-	page := structures.Result_Page{
-		Title:  "HTTP-PGSQL DELETE CONTENT",
-		Result: "Content ID " + r.FormValue("id") + " deleted succsessfully",
-	}
-	t.Execute(w, &page)
+	t.TableMaker(w, "InsertContent", []string{"Deleted ID", "Deleted Content", "Deleted ID_Author", "Deleted Author Name", "Deleted Date"}, content)
 }

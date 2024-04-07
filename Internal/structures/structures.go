@@ -14,13 +14,9 @@ type Get_Page struct {
 
 type Result_Page struct {
 	Title      string
-	Result     string
-	BackButton string
-}
-type Table struct {
-	Title      string
 	First_Line []string
-	Data       [][]string
+	Data       any
+	BackButton string
 }
 
 type Author struct {

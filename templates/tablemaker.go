@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"reflect"
 
-	config "github.com/ViPDanger/Golang/Internal/config"
+	"github.com/ViPDanger/Golang/Internal/structures"
 )
 
-var templateFuncs = template.FuncMap{"rangeStruct": RangeStructer}
+var templateFuncs = template.FuncMap{"rangeStruct": rangeStructer}
 
 // In the template, we use rangeStruct to turn our struct values
 // into a slice we can iterate over
@@ -21,11 +21,14 @@ var htmlTemplate = `<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
+		<title>{{.Title}}</title>
 	</head>
 	<body>
-		<p> Data </p>
+		
         <table border="1" cellpadding="5" cellspacing="5">
-			{{range .}}<tr>
+			{{range .First_Line}} <td>{{.}}</td>
+			{{end}}</tr>
+			{{range .Data}}<tr>
 			{{range rangeStruct .}} <td>{{.}}</td>
 			{{end}}</tr>
 			{{end}}
@@ -33,21 +36,19 @@ var htmlTemplate = `<!DOCTYPE html>
 
 
 			<form action="/" method="post">
-				<input type="submit" name="" value= "Вернуться назад:">
+				<input type="submit" name="" value= {{.BackButton}}>
 			</form>
 
 
 	</body>
 </html>`
 
-func TableMaker(w http.ResponseWriter, data any) {
+func TableMaker(w http.ResponseWriter, Title string, First_Line []string, data any) {
 
 	// We create the template and register out template function
-
 	var err error
-	t := template.New("t").Funcs(templateFuncs)
+	t := template.New("template").Funcs(templateFuncs)
 	t, err = t.Parse(htmlTemplate)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to parse files"))
@@ -55,19 +56,33 @@ func TableMaker(w http.ResponseWriter, data any) {
 		return
 
 	}
-	err = t.Execute(w, data)
-	config.Err_log(err)
+	page := structures.Result_Page{
+		Title:      Title,
+		First_Line: First_Line,
+		BackButton: "Вернуться Назад",
+	}
+	if reflect.ValueOf(data).Kind() == reflect.Slice {
+		page.Data = data
+	} else {
+		page.Data = append([]any{}, data)
+	}
+	err = t.Execute(w, page)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERR NO EXECUTE FILE"))
+		log.Println(err)
+		return
+	}
 }
 
 // RangeStructer takes the first argument, which must be a struct, and
 // returns the value of each field in a slice. It will return nil
 // if there are no arguments or first argument is not a struct
 
-func RangeStructer(args ...any) []interface{} {
+func rangeStructer(args ...any) []interface{} {
 	if len(args) == 0 {
 		return nil
 	}
-
 	v := reflect.ValueOf(args)
 	if v.Kind() != reflect.Struct {
 		v = reflect.ValueOf(args[0])
@@ -75,7 +90,6 @@ func RangeStructer(args ...any) []interface{} {
 			return nil
 		}
 	}
-	log.Println(v, v.Kind())
 	out := structer(v)
 	return out
 }
