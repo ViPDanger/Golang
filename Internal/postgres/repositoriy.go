@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"github.com/ViPDanger/Golang/Internal/config"
 	"github.com/ViPDanger/Golang/Internal/structures"
@@ -85,7 +86,7 @@ func (r *Repository) All_Authors() ([]structures.Author, error) {
 }
 
 func (r *Repository) All_Content() ([]structures.Content, error) {
-	query := "SELECT http_string.id,http_string.content,author.id,author.name FROM http_string inner join author on http_string.author_id = author.id"
+	query := "SELECT http_string.id,http_string.content,author.id,author.name,http_string.date FROM http_string inner join author on http_string.author_id = author.id"
 	content := make([]structures.Content, 0)
 	rows, err := r.client.Query(context.Background(), query)
 	if err != nil {
@@ -95,7 +96,9 @@ func (r *Repository) All_Content() ([]structures.Content, error) {
 
 	for i := 0; rows.Next(); i++ {
 		content = append(content, structures.Content{})
-		err := rows.Scan(&content[i].ID, &content[i].Content, &content[i].Author.ID, &content[i].Author.Name)
+		var time time.Time
+		err := rows.Scan(&content[i].ID, &content[i].Content, &content[i].Author.ID, &content[i].Author.Name, &time)
+		content[i].Date = time.Format("02.01.2006  15:04:05")
 		if config.Err_log(err) {
 			return nil, err
 		}
@@ -103,22 +106,22 @@ func (r *Repository) All_Content() ([]structures.Content, error) {
 	return content, err
 }
 
-func (r *Repository) Find_Author(id int) (*structures.Author, error) {
+func (r *Repository) Find_Author(id int) (structures.Author, error) {
 	var author structures.Author
 	query := "SELECT * FROM author WHERE id = $1"
 	err := r.client.QueryRow(context.Background(), query, id).Scan(&author.ID, &author.Name)
 	config.Err_log(err)
-	return &author, err
+	return author, err
 }
 
-func (r *Repository) Find_Content(id int) (*structures.Content, error) {
+func (r *Repository) Find_Content(id int) (structures.Content, error) {
 	var content structures.Content
-	query := "SELECT http_string.id,http_string.content,author.id,author.name FROM http_string inner join author on http_string.author_id = author.id  WHERE http_string.id = $1"
-	err := r.client.QueryRow(context.Background(), query, id).Scan(&content.ID, &content.Content, &content.Author.ID, &content.Author.Name)
+	query := "SELECT http_string.id,http_string.content,author.id,author.name,http_string.date FROM http_string inner join author on http_string.author_id = author.id  WHERE http_string.id = $1"
+	err := r.client.QueryRow(context.Background(), query, id).Scan(&content.ID, &content.Content, &content.Author.ID, &content.Author.Name, &content.Date)
 	config.Err_log(err)
-	return &content, err
+	return content, err
 }
-func (r *Repository) Delete_Author(id int) error {
+func (r *Repository) Delete_Author(id string) error {
 	ctx := context.Background()
 	tx, err := r.client.Begin(ctx)
 	if err != nil {
@@ -136,7 +139,7 @@ func (r *Repository) Delete_Author(id int) error {
 	return err
 }
 
-func (r *Repository) Delete_Content(id int) error {
+func (r *Repository) Delete_Content(id string) error {
 	ctx := context.Background()
 	tx, err := r.client.Begin(ctx)
 	if err != nil {

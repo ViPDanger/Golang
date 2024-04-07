@@ -7,15 +7,41 @@
 	</head>
 	<body>
 		<p>{{.SearchAllAuthor}}</p>
-        <form action="/response" method="post">
+        <form action="/response/AllAuthors" method="post">
             <input type="submit" name="" value="Отправить">
         </form>
 		<p>{{.SearchAllContent}}</p>
-		<form action="/response" method="post">
+		<form action="/response/AllContent" method="post">
             <input type="submit" name="" value="Отправить">
         </form>
-		<p>{{.SearchAutrorID}}</p>
-		<form action="/response" method="post">
+		<p>{{.SearchAuthorID}}</p>
+		<form action="/response/FindAuthor" method="post">
+			<input type="text" name="id" value="">
+            <input type="submit" name="" value="Отправить">
+        </form>
+		<p>{{.SearchContentID}}</p>
+		<form action="/response/FindContent" method="post">
+			<input type="text" name="id" value="">
+            <input type="submit" name="" value="Отправить">
+        </form>
+		<p>{{.InputAuthor}}</p>
+		<form action="/response/InsertAuthor" method="post">
+			<input type="text" name="name" value="">
+            <input type="submit" name="" value="Отправить">
+        </form>
+		<p>{{.InputContent}}</p>
+		<form action="/response/InsertContent" method="post">
+			<input type="text" name="content" value="">
+			<input type="text" name="author_id" value="">
+            <input type="submit" name="" value="Отправить">
+        </form>
+		<p>{{.DeleteAuthorID}}</p>
+		<form action="/response/DeleteAuthor" method="post">
+			<input type="text" name="id" value="">
+            <input type="submit" name="" value="Отправить">
+        </form>
+		<p>{{.DeleteContentID}}</p>
+		<form action="/response/DeleteContent" method="post">
 			<input type="text" name="id" value="">
             <input type="submit" name="" value="Отправить">
         </form>

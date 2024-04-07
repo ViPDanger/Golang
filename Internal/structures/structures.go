@@ -4,12 +4,23 @@ type Get_Page struct {
 	Title            string
 	SearchAllAuthor  string
 	SearchAllContent string
-	SearchAutrorID   string
+	SearchAuthorID   string
 	SearchContentID  string
 	InputAuthor      string
 	InputContent     string
 	DeleteAuthorID   string
 	DeleteContentID  string
+}
+
+type Result_Page struct {
+	Title      string
+	Result     string
+	BackButton string
+}
+type Table struct {
+	Title      string
+	First_Line []string
+	Data       [][]string
 }
 
 type Author struct {

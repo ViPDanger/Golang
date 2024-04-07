@@ -20,7 +20,6 @@ type Conf struct {
 
 func Err_log(err error) bool {
 	if err != nil {
-		log.Println("Error: ", err, " - ", err.Error())
 		panic(err)
 	}
 	return false

@@ -1,4 +1,4 @@
-package Handler
+package handler
 
 import (
 	"context"
@@ -34,7 +34,7 @@ func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc, rep *p
 	mux.HandleFunc("/txt/Add/", TXT_AddHandler)
 	mux.HandleFunc("/txt/Show", TXT_ShowHandler)
 	mux.HandleFunc("/txt/Delete/", TXT_DeleteHandler)
-	mux.HandleFunc("/response", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/response/", func(w http.ResponseWriter, r *http.Request) {
 		PG_Response(w, r, rep)
 	})
 	mux.HandleFunc("/", Get)

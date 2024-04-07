@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	sv "github.com/ViPDanger/Golang/Internal/Handler"
 	c "github.com/ViPDanger/Golang/Internal/config"
+	sv "github.com/ViPDanger/Golang/Internal/handler"
 	pg "github.com/ViPDanger/Golang/Internal/postgres"
 )
 
