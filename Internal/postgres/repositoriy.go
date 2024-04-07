@@ -132,6 +132,7 @@ func (r *Repository) Delete_Author(id int) error {
 	if err != nil {
 		return err
 	}
+	tx.Commit(ctx)
 	return err
 }
 
@@ -149,5 +150,6 @@ func (r *Repository) Delete_Content(id int) error {
 	if err != nil {
 		return err
 	}
+	tx.Commit(ctx)
 	return err
 }

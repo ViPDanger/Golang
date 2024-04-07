@@ -1,5 +1,17 @@
 package structures
 
+type Get_Page struct {
+	Title            string
+	SearchAllAuthor  string
+	SearchAllContent string
+	SearchAutrorID   string
+	SearchContentID  string
+	InputAuthor      string
+	InputContent     string
+	DeleteAuthorID   string
+	DeleteContentID  string
+}
+
 type Author struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`

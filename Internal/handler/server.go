@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
 	config "github.com/ViPDanger/Golang/Internal/config"
-	txt "github.com/ViPDanger/Golang/Internal/txt_file"
+	pg "github.com/ViPDanger/Golang/Internal/postgres"
 )
 
 type Server struct {
@@ -20,66 +18,30 @@ type Server struct {
 }
 type ShutDownHandler struct {
 	cancel_on_http context.CancelFunc
+	rep            pg.Repository
 }
 
-func (c ShutDownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (sht ShutDownHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Shutdown by http")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Server is going got Killed. Murderer."))
-	c.cancel_on_http()
+	sht.cancel_on_http()
 }
 
-func AddHandler(w http.ResponseWriter, r *http.Request) {
-
-	w.WriteHeader(http.StatusOK)
-	data := r.URL.Path
-	data = data[strings.IndexRune(data[1:], '/')+2:]
-	log.Println("GetData: ", data)
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("New string has been added: " + data + "\n"))
-	txt.TXT_Add_Data(data)
-
-	// Показ нового списка
-	ShowHandler(w, r)
-}
-
-func ShowHandler(w http.ResponseWriter, r *http.Request) {
-	config := config.Read_Config()
-	data := *txt.TXT_Read_Data(config.Data_File)
-	log.Println("Data was readed")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Current List:\n"))
-	for i := 0; i < len(data); i++ {
-		w.Write([]byte(strconv.Itoa(i) + ": " + data[i] + "\n"))
-	}
-}
-
-func DeleteHandler(w http.ResponseWriter, r *http.Request) {
-
-	w.WriteHeader(http.StatusOK)
-	data := r.URL.Path
-	data = data[strings.IndexRune(data[1:], '/')+2:]
-
-	// Удаление
-	data_int, _ := strconv.Atoi(data)
-	txt.TXT_Delete_Data(data_int)
-	log.Println("String deleted: ", data_int)
-	w.WriteHeader(http.StatusOK)
-
-	// Показ нового списка
-	ShowHandler(w, r)
-}
-
-func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc) {
-	SD_Handler := ShutDownHandler{cancel_on_http: cancel_on_http}
+func setupHandlers(mux *http.ServeMux, cancel_on_http context.CancelFunc, rep pg.Repository) {
+	SD_Handler := ShutDownHandler{cancel_on_http: cancel_on_http, rep: rep}
 	mux.Handle("/Shutdown", SD_Handler)
-	mux.HandleFunc("/Add/", AddHandler)
-	mux.HandleFunc("/Show", ShowHandler)
-	mux.HandleFunc("/Delete/", DeleteHandler)
+	mux.HandleFunc("/txt/Add/", TXT_AddHandler)
+	mux.HandleFunc("/txt/Show", TXT_ShowHandler)
+	mux.HandleFunc("/txt/Delete/", TXT_DeleteHandler)
+	mux.HandleFunc("/response", func(w http.ResponseWriter, r *http.Request) {
+		PG_Response(w, r, rep)
+	})
+	mux.HandleFunc("/", Get)
 }
 
-func (s *Server) Run(addres string, port string) error {
+func (s *Server) Run(addres string, port string, rep pg.Repository) error {
 	// Отстройка параметров
 
 	ctx_HTTP_Shutdown, cancel_on_http := context.WithCancel(context.Background())
@@ -87,7 +49,7 @@ func (s *Server) Run(addres string, port string) error {
 	defer stop()
 
 	mux := http.NewServeMux()
-	setupHandlers(mux, cancel_on_http)
+	setupHandlers(mux, cancel_on_http, rep)
 
 	s.httpServer = &http.Server{
 		Addr:           addres + ":" + port,

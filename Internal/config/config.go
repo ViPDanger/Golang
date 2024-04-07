@@ -29,9 +29,14 @@ func Err_log(err error) bool {
 func Read_Config() Conf {
 	var config Conf
 	data := make([]byte, 1024)
-	file, err := os.Open("config.cfg")
-	if Err_log(err) {
-		panic(err)
+
+	file, err := os.Open("cmd/config.cfg")
+	if err != nil {
+		// DEBUG conf
+		file, err = os.Open("config.cfg")
+		if Err_log(err) {
+			panic(err)
+		}
 	}
 	len, err := file.Read(data)
 	Err_log(err)
